@@ -48,3 +48,9 @@ Route.group(() => {
   })
 }).middleware('auth');
 
+Route.group(() => {
+  Route.get('/', 'UsersController.index')
+  Route.post('/', 'UsersController.store')
+  Route.get('/:id', 'UsersController.show')
+}).prefix('/users').middleware('auth');
+
