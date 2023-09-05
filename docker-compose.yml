@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    container_name: redis
+    image: redis:6-alpine
+    volumes:
+      - redis_volume:/data
+    ports:
+      - "6379:6379"
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 300M
+    ports:
+      - "8888:80"
+    depends_on:
+      - mysql
+volumes:
+  redis_volume:
+  mysql_data:

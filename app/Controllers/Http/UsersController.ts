@@ -1,30 +1,18 @@
-import User from "App/Models/User";
 import UserService from "App/Services/UserService";
 import CreateOrUpdateUserRequest from "App/Requests/CreateOrUpdateUserRequest";
-import Redis from '@ioc:Adonis/Addons/Redis'
 
 export default class UsersController {
   public async index({request}) {
-    //  // const page = request.page ?? 1;
-    //  // const users = await User.query().paginate(page,10);
-    //await Redis.flushall();
-
-    try {
-      let strUsers = await Redis.get('users');
-      if (strUsers != null){
-        return JSON.parse(strUsers);
-      }
-      const users = await User.all();
-      await Redis.set('users',JSON.stringify(users));
-      return users;
-    }catch (error){
-      const users = await User.all();
-      return users;
-    }
+    const req = request.all();
+    const userAction = new UserService();
+    return userAction.getPaginatedUsers(req);
   }
-  public async show({ request }){
-    const user = await User.find(request.param('id'));
-    return user;
+  public async show({ request,response }){
+    const userId = request.param('id');
+    const userAction = new UserService();
+    return await userAction.getUserById(userId) ?? response.status(404).send({
+      "error":"User not found."
+    });
   }
   public async store({ request }){
     const payload = new CreateOrUpdateUserRequest();
