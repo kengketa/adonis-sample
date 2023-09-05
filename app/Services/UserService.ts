@@ -15,22 +15,22 @@ export default class UserService {
     const page = req.page ?? 1;
     const cacheKey = 'users-' + page;
     try {
-      if (process.env.NODE_ENV === 'development') await Redis.del(cacheKey);
-      const strUsers = await Redis.get(cacheKey);
-      if (strUsers != null) return JSON.parse(strUsers);
+      if (process.env.NODE_ENV === 'development')  await Redis.del(cacheKey);
+      const cachedUsers = await Redis.get(cacheKey);
+      if (cachedUsers != null) return JSON.parse(cachedUsers);
       const users = await User.query().paginate(page, PERPAGE);
-      const transformedUsers = new UserTransformer().transformMany(users.toJSON())
+      const transformedUsers = await new UserTransformer().transformMany(users.toJSON())
       await Redis.set(cacheKey, JSON.stringify(transformedUsers));
       return transformedUsers;
     }catch (error){
       const users = await User.query().paginate(page, PERPAGE);
-      return new UserTransformer().transformMany(users.toJSON());
+      return await new UserTransformer().transformMany(users.toJSON());
     }
   }
   public async getUserById(id:bigint){
     const user = await User.find(id);
     if (!user) return null;
-    return new UserTransformer().transform(user);
+    return await new  UserTransformer().transform(user);
   }
 
 }

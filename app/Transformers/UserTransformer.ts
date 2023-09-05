@@ -17,19 +17,22 @@ class UserTransformer {
     // Define any additional configuration or options here
   }
 
-  public transform(user: User): Object {
+  public async transform(user: User): Promise<Object> {
+    const posts = await user.related('posts').query()
     return {
       id: user.id,
       email: user.email,
-      xx:"sfjdsfgsdjhgd"
+      posts:posts,
     }
   }
 
-  public transformMany(users: any): Object {
+  public async transformMany(users: any): Promise<Object> {
+    const meta = await users.meta;
+    const data = await Promise.all(users.data.map((user: User) => this.transform(user)));
     return {
-      meta: <Pagination>users.meta,
-      data: <User[]>users.data.map((user: User) => this.transform(user)),
-    }
+      meta: <Pagination>meta,
+      data: <User[]>data,
+    };
   }
 }
 
